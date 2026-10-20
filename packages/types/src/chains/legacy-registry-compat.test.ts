@@ -342,11 +342,11 @@ const equityIds = (registry: Record<(typeof EQUITY_SYMBOLS)[number], XToken>): s
 
 describe('legacy hub vault registries are unchanged prefixes', () => {
   it('HubVaultSymbols appends the equity symbols after the legacy order', () => {
-    expect([...HubVaultSymbols]).toEqual([...LEGACY_HUB_VAULT_SYMBOLS, ...EQUITY_SYMBOLS]);
+    expect([...HubVaultSymbols]).toEqual([...LEGACY_HUB_VAULT_SYMBOLS, ...EQUITY_SYMBOLS, 'sodaADA', 'sodaZEC']);
   });
 
   it('SodaTokens keys append the equity symbols after the legacy order', () => {
-    expect(Object.keys(SodaTokens)).toEqual([...LEGACY_SODA_TOKEN_KEYS, ...EQUITY_SYMBOLS]);
+    expect(Object.keys(SodaTokens)).toEqual([...LEGACY_SODA_TOKEN_KEYS, ...EQUITY_SYMBOLS, 'sodaADA', 'sodaZEC']);
   });
 });
 
@@ -368,6 +368,9 @@ describe('legacy spoke registries are unchanged prefixes', () => {
       ...LEGACY_ROBINHOOD_TOKEN_KEYS,
       ...EQUITY_SYMBOLS,
       ...keysOf(ROBINHOOD_APPENDED),
+      'AI',
+      'CASHCAT',
+      'TAO',
     ]);
   });
 

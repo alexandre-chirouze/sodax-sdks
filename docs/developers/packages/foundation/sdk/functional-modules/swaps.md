@@ -43,6 +43,30 @@ const supportedTokens: readonly XToken[] = sodax.swaps.getSupportedSwapTokensByC
 const allTokens: Record<SpokeChainKey, readonly XToken[]> = sodax.swaps.getSupportedSwapTokens();
 ```
 
+### Production and staging token lists
+
+`getSupportedSolverTokens(chainKey)` returns production tokens.
+`getStagingSolverTokens(chainKey)` returns production tokens plus staging-only tokens.
+`stagingSwapSupportedTokens[chainKey]` contains only the staging additions. Selecting
+one of these lists does not configure the solver endpoint; use the matching solver
+environment. `isSwapSupportedToken` accepts the union, so it is not a production-readiness check.
+
+Read staging membership from the packaged lists rather than maintaining a separate
+asset table. Newly listed staging swap assets are not automatically opted into
+production swaps or the money market.
+
+For tokens without a separate vault, the SDK represents the direct hub asset with
+`vault === hubAsset`; this does not create a vault or enable money-market support.
+The `sodaZEC` hub vault is registered to resolve the Solana ZEC mapping, but is not
+opted into swaps or the money market. Sonic `sodaADA` is staging-swap supported;
+native Cardano ADA remains outside the SDK's supported chains.
+
+```typescript
+import { ChainKeys, getStagingSolverTokens } from '@sodax/sdk';
+
+const stagingTokens = getStagingSolverTokens(ChainKeys.SOLANA_MAINNET);
+```
+
 ### RWA classification and token logos
 
 `XToken.isRwa === true` marks a registered tokenized stock, ETF or commodity,
