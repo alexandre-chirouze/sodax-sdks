@@ -36,7 +36,19 @@ describe('RWA metadata', () => {
     'INTC',
     'BABA',
   ];
-  const xstocks = ['CRCLx', 'TSLAx', 'SPYx', 'NVDAx', 'QQQx', 'MSTRx', 'COINx', 'GOOGLx', 'GLDx', 'HOODx', 'SPCXx'];
+  const xstocks = [
+    'CRCLx',
+    'TSLAx',
+    'SPYx',
+    'NVDAx',
+    'QQQx',
+    'MSTRx',
+    'COINx',
+    'GOOGLx',
+    solanaSupportedTokens.GLDx.symbol,
+    solanaSupportedTokens.HOODx.symbol,
+    solanaSupportedTokens.SPCXx.symbol,
+  ];
   const expectedByChain: Partial<Record<string, readonly string[]>> = {
     [ChainKeys.ROBINHOOD_MAINNET]: equities,
     [ChainKeys.SONIC_MAINNET]: equities,
