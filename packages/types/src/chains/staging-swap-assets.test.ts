@@ -1,89 +1,117 @@
 import { describe, expect, it } from 'vitest';
-import { ChainKeys, type SpokeChainKey } from './chains.js';
-import { SodaTokens, supportedTokensByChain, type XToken } from './tokens.js';
-import { getStagingSolverTokens, swapSupportedTokens, stagingSwapSupportedTokens } from '../swap/swap.js';
+import { ChainKeys } from './chains.js';
+import {
+  SodaTokens,
+  arbitrumSupportedTokens,
+  baseSupportedTokens,
+  bscSupportedTokens,
+  ethereumSupportedTokens,
+  robinhoodSupportedTokens,
+  solanaSupportedTokens,
+  suiSupportedTokens,
+  type XToken,
+} from './tokens.js';
+import { swapSupportedTokens, stagingSwapSupportedTokens } from '../swap/swap.js';
 import { moneyMarketSupportedTokens, moneyMarketReserveAssets } from '../moneyMarket/moneyMarket.js';
 
-const additions: Partial<Record<SpokeChainKey, readonly string[]>> = {
-  [ChainKeys.ARBITRUM_MAINNET]: ['CHIP', 'RAIN'],
-  [ChainKeys.BASE_MAINNET]: ['AAVE', 'JitoSOL', 'SOL', 'VVV', 'ZEN'],
-  [ChainKeys.BSC_MAINNET]: ['FF', 'PENDLE', 'STABLE', 'TUSD', 'U'],
-  [ChainKeys.ETHEREUM_MAINNET]: [
-    'AUSD',
-    'cirBTC',
-    'CRV',
-    'EURC',
-    'ICP',
-    'kBTC',
-    'NEAR',
-    'ONDO',
-    'QNT',
-    'SOL',
-    'tBTC',
-    'wM',
-    'wTAO',
-  ],
-  [ChainKeys.ROBINHOOD_MAINNET]: ['AI', 'CASHCAT', 'TAO'],
-  [ChainKeys.SOLANA_MAINNET]: [
-    '2Z',
-    'ANSEM',
-    'BP',
-    'CARDS',
-    'CASH',
-    'Fartcoin',
-    'GLDx',
-    'HOODx',
-    'HYPE',
-    'hyUSD',
-    'KMNO',
-    'LBTC',
-    'MET',
-    'ONYC',
-    'PENGU',
-    'PRIME',
-    'SPCXx',
-    'STONK',
-    'syrupUSDC',
-    'TRUMP',
-    'USX',
-    'xBTC',
-    'ZEC',
-  ],
-  [ChainKeys.SONIC_MAINNET]: ['sodaADA'],
-  [ChainKeys.SUI_MAINNET]: ['USDY'],
-};
+const DIRECT_HUB_TOKENS = [
+  arbitrumSupportedTokens.CHIP,
+  arbitrumSupportedTokens.RAIN,
+  baseSupportedTokens.AAVE,
+  baseSupportedTokens.VVV,
+  baseSupportedTokens.ZEN,
+  bscSupportedTokens.FF,
+  bscSupportedTokens.PENDLE,
+  bscSupportedTokens.STABLE,
+  bscSupportedTokens.TUSD,
+  bscSupportedTokens.U,
+  ethereumSupportedTokens.AUSD,
+  ethereumSupportedTokens.CRV,
+  ethereumSupportedTokens.EURC,
+  ethereumSupportedTokens.ICP,
+  ethereumSupportedTokens.ONDO,
+  ethereumSupportedTokens.QNT,
+  ethereumSupportedTokens.wM,
+  ethereumSupportedTokens.wTAO,
+  robinhoodSupportedTokens.AI,
+  robinhoodSupportedTokens.CASHCAT,
+  robinhoodSupportedTokens.TAO,
+  solanaSupportedTokens['2Z'],
+  solanaSupportedTokens.ANSEM,
+  solanaSupportedTokens.BP,
+  solanaSupportedTokens.CARDS,
+  solanaSupportedTokens.CASH,
+  solanaSupportedTokens.Fartcoin,
+  solanaSupportedTokens.GLDx,
+  solanaSupportedTokens.HOODx,
+  solanaSupportedTokens.hyUSD,
+  solanaSupportedTokens.KMNO,
+  solanaSupportedTokens.MET,
+  solanaSupportedTokens.ONYC,
+  solanaSupportedTokens.PENGU,
+  solanaSupportedTokens.PRIME,
+  solanaSupportedTokens.SPCXx,
+  solanaSupportedTokens.STONK,
+  solanaSupportedTokens.syrupUSDC,
+  solanaSupportedTokens.TRUMP,
+  solanaSupportedTokens.USX,
+  suiSupportedTokens.USDY,
+] satisfies readonly XToken[];
 
-const identity = (token: XToken): string =>
-  token.address.startsWith('0x') && !token.address.includes('::') ? token.address.toLowerCase() : token.address;
+const VAULT_LINKED_TOKENS = [
+  { token: baseSupportedTokens.JitoSOL, vault: SodaTokens.sodaJITOSOL },
+  { token: baseSupportedTokens.SOL, vault: SodaTokens.sodaSOL },
+  { token: ethereumSupportedTokens.cirBTC, vault: SodaTokens.sodaBTC },
+  { token: ethereumSupportedTokens.kBTC, vault: SodaTokens.sodaBTC },
+  { token: ethereumSupportedTokens.NEAR, vault: SodaTokens.sodaNEAR },
+  { token: ethereumSupportedTokens.SOL, vault: SodaTokens.sodaSOL },
+  { token: ethereumSupportedTokens.tBTC, vault: SodaTokens.sodaBTC },
+  { token: solanaSupportedTokens.HYPE, vault: SodaTokens.sodaHYPE },
+  { token: solanaSupportedTokens.LBTC, vault: SodaTokens.sodaBTC },
+  { token: solanaSupportedTokens.xBTC, vault: SodaTokens.sodaBTC },
+  { token: solanaSupportedTokens.ZEC, vault: SodaTokens.sodaZEC },
+] satisfies readonly { token: XToken; vault: XToken }[];
 
-describe('staging swap asset additions', () => {
-  for (const [chain, symbols] of Object.entries(additions)) {
-    it(`registers each addition only in staging swaps on ${chain}`, () => {
-      const chainKey = Object.values(ChainKeys).find(key => key === chain);
-      if (!chainKey) throw new Error(`Unknown chain ${chain}`);
-      const registry: readonly XToken[] = Object.values(supportedTokensByChain[chainKey]);
-      for (const symbol of symbols) {
-        const matches = registry.filter(token => token.symbol === symbol);
-        expect(matches).toHaveLength(1);
-        const token = matches[0];
-        if (!token) throw new Error(`Missing ${symbol} on ${chain}`);
-        expect(token.chainKey).toBe(chainKey);
-        expect(stagingSwapSupportedTokens[chainKey]).toContain(token);
-        expect(getStagingSolverTokens(chainKey)).toContain(token);
-        expect(swapSupportedTokens[chainKey].map(identity)).not.toContain(identity(token));
-        expect(moneyMarketSupportedTokens[chainKey].map(identity)).not.toContain(identity(token));
-      }
-    });
-  }
+const STAGING_ADDITIONS = [
+  ...DIRECT_HUB_TOKENS,
+  ...VAULT_LINKED_TOKENS.map(({ token }) => token),
+  SodaTokens.sodaADA,
+] satisfies readonly XToken[];
 
-  it('registers the new vaults without enabling money-market reserves', () => {
-    for (const token of [SodaTokens.sodaADA, SodaTokens.sodaZEC]) {
-      expect(token.chainKey).toBe(ChainKeys.SONIC_MAINNET);
-      expect(token.decimals).toBe(18);
-      expect(token.address).toBe(token.hubAsset);
-      expect(token.vault).toBe(token.hubAsset);
-      expect(moneyMarketReserveAssets.map(address => address.toLowerCase())).not.toContain(token.address);
-    }
-    expect(getStagingSolverTokens(ChainKeys.SONIC_MAINNET)).not.toContain(SodaTokens.sodaZEC);
+describe('staging swap asset mappings', () => {
+  it.each(DIRECT_HUB_TOKENS)('$symbol on $chainKey uses its hub asset without a separate vault', token => {
+    expect(token.vault).toBe(token.hubAsset);
+  });
+
+  it.each(VAULT_LINKED_TOKENS)('$token.symbol on $token.chainKey points to $vault.symbol', ({ token, vault }) => {
+    expect(token.vault).toBe(vault.address);
+  });
+});
+
+describe('staging swap asset membership', () => {
+  it.each(STAGING_ADDITIONS)('$symbol on $chainKey is enabled only for staging swaps', token => {
+    expect(stagingSwapSupportedTokens[token.chainKey]).toContain(token);
+    expect(swapSupportedTokens[token.chainKey]).not.toContainEqual(token);
+    expect(moneyMarketSupportedTokens[token.chainKey]).not.toContainEqual(token);
+  });
+});
+
+describe('new canonical hub vaults', () => {
+  it.each([
+    SodaTokens.sodaADA,
+    SodaTokens.sodaZEC,
+  ])('$symbol is a Sonic vault without a money-market reserve', token => {
+    expect(token.chainKey).toBe(ChainKeys.SONIC_MAINNET);
+    expect(token.decimals).toBe(18);
+    expect(token.address).toBe(token.hubAsset);
+    expect(token.vault).toBe(token.address);
+    expect(moneyMarketReserveAssets).not.toContain(token.address);
+  });
+
+  it('registers sodaZEC for spoke mappings without enabling the vault itself for swaps or lending', () => {
+    const token = SodaTokens.sodaZEC;
+    expect(stagingSwapSupportedTokens[token.chainKey]).not.toContainEqual(token);
+    expect(swapSupportedTokens[token.chainKey]).not.toContainEqual(token);
+    expect(moneyMarketSupportedTokens[token.chainKey]).not.toContainEqual(token);
   });
 });

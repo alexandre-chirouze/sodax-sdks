@@ -15,7 +15,7 @@ integration targets instead of hardcoding symbols.
 
 Staging membership does not imply money-market support. When a token has no
 separate vault, its registry entry uses `vault === hubAsset` for the direct hub
-asset. Sonic `sodaADA` support does not provide native Cardano wallet or spoke support.
+asset. Canonical hub vault registration alone does not enable swaps or lending.
 
 ## How it works
 

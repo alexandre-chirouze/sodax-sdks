@@ -341,11 +341,11 @@ const equityIds = (registry: Record<(typeof EQUITY_SYMBOLS)[number], XToken>): s
   EQUITY_SYMBOLS.map(symbol => `${symbol}:${registry[symbol].address}`);
 
 describe('legacy hub vault registries are unchanged prefixes', () => {
-  it('HubVaultSymbols appends the equity symbols after the legacy order', () => {
+  it('HubVaultSymbols preserves the legacy order before the appended vaults', () => {
     expect([...HubVaultSymbols]).toEqual([...LEGACY_HUB_VAULT_SYMBOLS, ...EQUITY_SYMBOLS, 'sodaADA', 'sodaZEC']);
   });
 
-  it('SodaTokens keys append the equity symbols after the legacy order', () => {
+  it('SodaTokens keys preserve the legacy order before the appended vaults', () => {
     expect(Object.keys(SodaTokens)).toEqual([...LEGACY_SODA_TOKEN_KEYS, ...EQUITY_SYMBOLS, 'sodaADA', 'sodaZEC']);
   });
 });

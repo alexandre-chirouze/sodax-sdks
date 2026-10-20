@@ -51,15 +51,10 @@ const allTokens: Record<SpokeChainKey, readonly XToken[]> = sodax.swaps.getSuppo
 one of these lists does not configure the solver endpoint; use the matching solver
 environment. `isSwapSupportedToken` accepts the union, so it is not a production-readiness check.
 
-Read staging membership from the packaged lists rather than maintaining a separate
-asset table. Newly listed staging swap assets are not automatically opted into
-production swaps or the money market.
-
-For tokens without a separate vault, the SDK represents the direct hub asset with
-`vault === hubAsset`; this does not create a vault or enable money-market support.
-The `sodaZEC` hub vault is registered to resolve the Solana ZEC mapping, but is not
-opted into swaps or the money market. Sonic `sodaADA` is staging-swap supported;
-native Cardano ADA remains outside the SDK's supported chains.
+Swap membership and money-market support are configured independently of the
+canonical hub vault registry. Registering a vault does not enable either feature.
+For tokens without a separate vault, `vault === hubAsset` represents the direct
+hub asset; it does not create a vault.
 
 ```typescript
 import { ChainKeys, getStagingSolverTokens } from '@sodax/sdk';
