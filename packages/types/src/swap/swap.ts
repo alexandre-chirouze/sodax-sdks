@@ -159,7 +159,6 @@ export const swapSupportedTokens = {
     spokeChainConfig[ChainKeys.BSC_MAINNET].supportedTokens.USD1,
     spokeChainConfig[ChainKeys.BSC_MAINNET].supportedTokens.ASTER,
     spokeChainConfig[ChainKeys.BSC_MAINNET].supportedTokens.XRP,
-    spokeChainConfig[ChainKeys.BSC_MAINNET].supportedTokens.ADA,
     spokeChainConfig[ChainKeys.BSC_MAINNET].supportedTokens.DOGE,
     spokeChainConfig[ChainKeys.BSC_MAINNET].supportedTokens.SOL,
     spokeChainConfig[ChainKeys.BSC_MAINNET].supportedTokens.DOT,
@@ -501,6 +500,7 @@ export const swapSupportedTokens = {
 // their target environment — validation accepts either (see `isSwapSupportedToken`).
 // Staging-only membership is confirmed against the target solver deployment.
 export const stagingSwapSupportedTokens = {
+  // ADA vault liquidity is insufficient to sell in production.
   [ChainKeys.SONIC_MAINNET]: [SodaTokens.sodaADA] as const satisfies XToken[],
   [ChainKeys.AVALANCHE_MAINNET]: [],
   [ChainKeys.ARBITRUM_MAINNET]: [],
@@ -513,13 +513,15 @@ export const stagingSwapSupportedTokens = {
     spokeChainConfig[ChainKeys.POLYGON_MAINNET].supportedTokens.USDT,
     spokeChainConfig[ChainKeys.POLYGON_MAINNET].supportedTokens.wstETH,
   ] as const satisfies XToken[],
-  [ChainKeys.BSC_MAINNET]: [],
+  [ChainKeys.BSC_MAINNET]: [spokeChainConfig[ChainKeys.BSC_MAINNET].supportedTokens.ADA] as const satisfies XToken[],
   [ChainKeys.HYPEREVM_MAINNET]: [],
   [ChainKeys.LIGHTLINK_MAINNET]: [
     spokeChainConfig[ChainKeys.LIGHTLINK_MAINNET].supportedTokens['HYPE.LL'],
   ] as const satisfies XToken[],
   [ChainKeys.SOLANA_MAINNET]: [
+    // Meteora swaps do not support this Token-2022 token.
     spokeChainConfig[ChainKeys.SOLANA_MAINNET].supportedTokens.ANSEM,
+    // No correct production price feed.
     spokeChainConfig[ChainKeys.SOLANA_MAINNET].supportedTokens.PRIME,
   ] as const satisfies XToken[],
   [ChainKeys.ICON_MAINNET]: [],
@@ -531,6 +533,7 @@ export const stagingSwapSupportedTokens = {
   [ChainKeys.ETHEREUM_MAINNET]: [
     spokeChainConfig[ChainKeys.ETHEREUM_MAINNET].supportedTokens.wstETH,
     spokeChainConfig[ChainKeys.ETHEREUM_MAINNET].supportedTokens.weETH,
+    // The production pool is empty.
     spokeChainConfig[ChainKeys.ETHEREUM_MAINNET].supportedTokens.wM,
   ] as const satisfies XToken[],
   [ChainKeys.REDBELLY_MAINNET]: [],
